@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol"; // Import the Hardhat console library
 
 contract DegenToken is ERC20, Ownable {
     constructor() ERC20("Degen", "DGN") {}
@@ -40,6 +41,7 @@ contract DegenToken is ERC20, Ownable {
         _burn(msg.sender, totalCost);
 
         emit RedeemItem(msg.sender, itemId, quantity);
+        console.log("Redemption successful for user %s. ItemId: %s, Quantity: %s", msg.sender, itemId, quantity);
     }
 
     function checkBalance() external view returns (uint256) {
