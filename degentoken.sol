@@ -7,6 +7,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract DegenToken is ERC20, Ownable {
     constructor() ERC20("Degen", "DGN") {}
 
+    event RedeemItem(address indexed user, uint256 itemId, uint256 quantity);
+
+    struct InGameItem {
+        uint256 itemId;
+        string name;
+        uint256 cost;
+    }
+
+    mapping(uint256 => InGameItem) public items;
+
+    uint256 private nextItemId = 1;
+
+    function addInGameItem(string memory name, uint256 cost) external onlyOwner {
+        items[nextItemId] = InGameItem(nextItemId, name, cost);
+        nextItemId++;
+    }
+
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
     }
@@ -16,10 +33,13 @@ contract DegenToken is ERC20, Ownable {
         _transfer(msg.sender, receiver, value);
     }
 
-    function redeemTokens(uint256 amount) external {
-        require(balanceOf(msg.sender) >= amount, "Insufficient Degen Tokens");
-        _burn(msg.sender, amount);
-        // Implement logic for redeeming tokens for items in the in-game store
+    function redeemTokens(uint256 itemId, uint256 quantity) external {
+        require(balanceOf(msg.sender) >= items[itemId].cost * quantity, "Insufficient Degen Tokens");
+
+        uint256 totalCost = items[itemId].cost * quantity;
+        _burn(msg.sender, totalCost);
+
+        emit RedeemItem(msg.sender, itemId, quantity);
     }
 
     function checkBalance() external view returns (uint256) {
